@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf8">
+  <link rel="stylesheet" href="index.css">
+  <script src="popup.js" type="module"></script>
+  <title>Tab auto reloader</title>
+</head>
+
+<body>
+
+  <section id="section_this_tab">
+    <input type="button" id="stopButton" value="Stop reloading this tab">
+  </section>
+
+  <section id="section_presets">
+    <div class="preset_row">
+      <input type="button" class="preset_button" data-seconds="5000" value="5s">
+      <input type="button" class="preset_button" data-seconds="10000" value="10s">
+      <input type="button" class="preset_button" data-seconds="15000" value="15s">
+      <input type="button" class="preset_button" data-seconds="20000" value="20s">
+      <input type="button" class="preset_button" data-seconds="30000" value="30s">
+      <input type="button" class="preset_button" data-seconds="45000" value="45s">
+      <input type="button" class="preset_button" data-seconds="60000" value="60s">
+    </div>
+    <div class="preset_row">
+      <input type="button" class="preset_button" data-seconds="1200" value="2min">
+      <input type="button" class="preset_button" data-seconds="3000" value="5min">
+      <input type="button" class="preset_button" data-seconds="6000" value="10min">
+      <input type="button" class="preset_button" data-seconds="9000" value="15min">
+      <input type="button" class="preset_button" data-seconds="12000" value="20min">
+      <input type="button" class="preset_button" data-seconds="18000" value="30min">
+      <input type="button" class="preset_button" data-seconds="27000" value="45min">
+    </div>
+    <div class="preset_row">
+      <input type="button" class="preset_button" data-seconds="36000" value="1h">
+      <input type="button" class="preset_button" data-seconds="72000" value="2h">
+      <input type="button" class="preset_button" data-seconds="108000" value="3h">
+      <input type="button" class="preset_button" data-seconds="144000" value="4h">
+      <input type="button" class="preset_button" data-seconds="288000" value="8h">
+      <input type="button" class="preset_button" data-seconds="432000" value="12h">
+      <input type="button" class="preset_button" data-seconds="864000" value="24h">
+    </div>
+  </section>
+
+  <div class="switch-wrapper">
+    <label class="switch">
+      <input type="checkbox" id="toggle" />
+      <span class="slider round"></span>
+    </label>
+    <span id="currentDelay"></span>
+  </div>
+</body>
+
+</html>
