@@ -1,6 +1,6 @@
 'use strict';
 
-import { createButton, removeButton } from '../button.js'
+import { createButton, removeButton } from './button.js'
 
 const getCurrentTabId = async () => {
 	const [tab] = await chrome.tabs.query({currentWindow: true, active : true })
