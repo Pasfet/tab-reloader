@@ -1,69 +1,64 @@
 'use strict';
-import { createButton, removeButton } from './button.js'
 
-const reloadWindow = (tabId, cmd) => {
-  if (cmd) {
-    chrome.storage.local.set({ showStartButton: true }, () => {
-      createButton(tabId)
-    })
-  } else {
-    chrome.storage.local.get(['showStartButton'], ({ showStartButton }) => {
-      if (showStartButton) {
-        createButton(tabId)
-      } else {
-        removeButton(tabId)
-      }
-    })
-  }
-}
+import { Button } from './button';
+import { ChromeStorage } from './storage'
+import { ChromeTabs } from './tabs';
+import { TimerReload } from "./timer";
 
-
-const init = async () => {
-  const storage = await chrome.storage.local.get(['timerStart', 'delay'])
-  let timer = null
-  let delay = storage.delay || 30000
-  let timerStart = storage.timerStart
-  let localTabId = null
-
-  chrome.tabs.onActivated.addListener(({ tabId }) => {
-    localTabId = tabId
-    reloadWindow(tabId)
-  })
-
-  chrome.tabs.onUpdated.addListener((tabId) => {
-    localTabId = tabId
-    reloadWindow(tabId)
-  })
-
-  chrome.commands.onCommand.addListener((command) => {
-    reloadWindow(localTabId, command)
-  })
+const init = () => {
+  const storage = new ChromeStorage()
+  const timer = new TimerReload(storage)
+  const tabs = new ChromeTabs()
 
   const timerRun = () => {
-    if (timerStart && delay && !timer) {
-      timer = setInterval(() => {
-        chrome.tabs.reload()
-      }, delay)
-    } else {
-      clearInterval(timer)
-      timer = null
-    }  
+    timer.timerRun(() => {
+      tabs.reload()
+    })
   }
 
+  const initButton = async (tabId) => {
+    const button = new Button(tabId)
+    const { showStartButton, timerStart } = await storage.get(['showStartButton', 'timerStart'])
 
-  chrome.storage.onChanged.addListener((changes) => {
-    if (changes.timerStart && changes.timerStart.newValue !== timerStart) {
-      timerStart = changes.timerStart.newValue
+    if (showStartButton) {
+      button.create(timerStart)
+    } else {
+      button.remove()
     }
 
-    if (changes.delay && changes.delay.newValue !== delay) {
-      delay = changes.delay.newValue
+    if (timerStart && timer.timer === null) {
+      timerRun()
     }
+  }
 
-    timerRun()
+  tabs.onEventsTab('onUpdated', (tabId) => {
+    initButton(tabId)
   })
 
-  timerRun()
+  tabs.onEventsTab('onActivated', ({ tabId }) => {
+    initButton(tabId)
+  })
+
+  storage.changed(async changes => {
+    if (changes.timerStart) {
+      if (changes.timerStart.newValue) {
+        await storage.set({ timerStart: true })
+        timerRun()
+      } else {
+        await storage.set({ timerStart: false })
+        await timer.timerStop()
+      }
+    }
+
+    if (changes.delay) {
+      await timer.timerStop()
+
+      if (changes.delay.newValue) {
+        await timer.setDelay()
+        await storage.set({ delay: changes.delay.newValue })
+      }
+    }
+  })
 }
 
-init();
+init()
